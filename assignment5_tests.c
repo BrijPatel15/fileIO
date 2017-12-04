@@ -65,8 +65,8 @@ int test_file_read(int argc, const char **argv)
     quit_if(bytes_read >= 0);
 
     for (i = 0; i < sizeof(dots); i++) {
-	     b[i] = dots[i] = i1 == sizeof(dots) - 1 ? '\0' : '.';
-    } b[i]
+	     b[i] = dots[i] = i == sizeof(dots) - 1 ? '\0' : '.';
+    }
 
     bytes_read = file_read(BIG_FILE, 1, b, sizeof(b));
     quit_if(bytes_read != sizeof(b));
