@@ -65,8 +65,9 @@ int file_info(char *path, void *buffer, size_t bufbytes)
 int file_write(char *path, int offset, void *buffer, size_t bufbytes)
 {
   int file;
-  if (path == NULL||!buffer||bufbytes<1||offset<0)
+  if (path == NULL||buffer == NULL||bufbytes <= 0||offset < 0){
     return IOERR_INVALID_ARGS;
+  }
   int fd = open(path, O_WRONLY|O_CREAT, S_IRUSR | S_IWUSR);
   if (fd==-1){
     return IOERR_INVALID_PATH;
@@ -82,38 +83,21 @@ int file_write(char *path, int offset, void *buffer, size_t bufbytes)
 int file_create(char *path, char *pattern, int repeatcount)
 {
     int fd = 0;
-    int file;
     int i = 0;
-    // int len;
-    // char expected[] = "abcabcabcabcabc";
-    // int lenO;
     char t[sizeof(pattern) * repeatcount];
     if(path == NULL || repeatcount < 0){
       return IOERR_INVALID_PATH;
     }
-    fd = open(path, O_RDWR|O_CREAT, S_IRWXU);
-    // printf( "fd = %d\n", fd);
-    if(fd == -1){
-      return IOERR_INVALID_PATH;
-    }
-    // printf("%s\n", pattern);
-    // printf("%d\n", repeatcount);
     for(; i < repeatcount; i++){
-
       strcat(t,pattern);
-    //  printf("%s\n", t);
     }
-
-    file = write(fd,t,sizeof(t));
-  //  printf("%d\n", file);
-    if(file < 0){
-      return -1;
-    }
-    // len = strlen(t);
-    // lenO = strlen(expected);
-    // printf("original: %d   mine: %d\n", lenO,len);
-
-    return 0;
+    FILE *file = fopen(path, "w");
+    fwrite(t, sizeof(char), strlen(t), file);
+    if(file == NULL) {
+  		return -1;
+  	}
+  	fclose(file);
+  	return 0;
 }
 
 int file_remove(char *path)
@@ -157,17 +141,17 @@ int dir_list(char *path, void *buffer, size_t bufbytes)
     while ((dir = readdir (openDir)) != NULL){
       sprintf(buffer+strlen(buffer), "%s\n", dir->d_name);
     }
-    closedir (dir);
+    closedir(dir);
     return 0;
 }
 
 
 int file_checksum(char *path)
 {
+    char *b[11];
     if(path == NULL){
       return IOERR_INVALID_ARGS;
     }
-    char *b[11];
     int fileCheck = file_read(path, 0, b, 11);
     if(fileCheck == -1){
       return IOERR_POSIX;
